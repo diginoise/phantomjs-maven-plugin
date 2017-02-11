@@ -1,0 +1,89 @@
+mappings:
+  -
+    condition:
+      version: "[2.5.0,)"
+      os: "linux"
+      architecture: "x86_64"
+      distribution: "ubuntu"
+      distributionVersion: "16.04"
+    archive:
+      classifier: "linux-ubuntu-xenial-x86_64"
+      extension: "tar.gz"
+      executable: "bin/phantomjs"
+  -
+    condition:
+      version: "[2.5.0,)"
+      os: "linux"
+      architecture: "x86_64"
+      distribution: "ubuntu"
+      distributionVersion: "14.04"
+    archive:
+      classifier: "linux-ubuntu-trusty-x86_64"
+      extension: "tar.gz"
+      executable: "bin/phantomjs"
+  -
+    condition:
+      version: "(,2.5.0)"
+      os: "linux"
+      architecture: "x86_64"
+    archive:
+      classifier: "linux-x86_64"
+      extension: "tar.bz2"
+      executable: "bin/phantomjs"
+  -
+    condition:
+      version: "(,2.5.0)"
+      os: "linux"
+      architecture: "i686"
+    archive:
+      classifier: "linux-i686"
+      extension: "tar.bz2"
+      executable: "bin/phantomjs"
+  -
+    condition:
+      version: "[2.5.0,)"
+      os: "mac"
+    archive:
+      classifier: "macos"
+      extension: "zip"
+      executable: "bin/phantomjs"
+  -
+    condition:
+      version: "(2.0.0,2.5.0)"
+      os: "mac"
+    archive:
+      classifier: "macosx"
+      extension: "zip"
+      executable: "bin/phantomjs"
+  -
+    condition:
+      version: "[2.0.0]"
+      os: "mac"
+    archive:
+      classifier: "macosx-fix01"
+      extension: "zip"
+      executable: "bin/phantomjs"
+  -
+    condition:
+      version: "(,2.0.0)"
+      os: "mac"
+    archive:
+      classifier: "macosx"
+      extension: "zip"
+      executable: "bin/phantomjs"
+  -
+    condition:
+      version: "[2.0.0,)"
+      os: "win"
+    archive:
+      classifier: "windows"
+      extension: "zip"
+      executable: "bin/phantomjs.exe"
+  -
+    condition:
+      version: "(,2.0.0)"
+      os: "win"
+    archive:
+      classifier: "windows"
+      extension: "zip"
+      executable: "phantomjs.exe"

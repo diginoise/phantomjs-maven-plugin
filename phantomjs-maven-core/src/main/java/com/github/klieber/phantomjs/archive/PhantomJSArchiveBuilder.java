@@ -21,38 +21,66 @@
 package com.github.klieber.phantomjs.archive;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.github.klieber.phantomjs.util.VersionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URL;
+
 public class PhantomJSArchiveBuilder {
-	
-	private final String platform;
-	private final String arch;
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(PhantomJSArchiveBuilder.class);
+
+	private final OperatingSystem operatingSystem;
 	private final String version;
-	
-	public PhantomJSArchiveBuilder(String platform, String arch, String version) {
-		this.platform = platform;
-		this.arch     = arch;
+
+	public PhantomJSArchiveBuilder(OperatingSystem operatingSystem,
+																 String version) {
+		this.operatingSystem = operatingSystem;
 		this.version  = version;
 	}
-	
-	public PhantomJSArchiveBuilder(String version) {
-		this(
-				System.getProperty("os.name").toLowerCase(),
-				System.getProperty("os.arch").toLowerCase(),
-				version
-		);
-	}
-	
+
+	private boolean contains(ArchiveCondition condition) {
+    return
+        VersionUtil.isWithin(this.version.replaceAll("[^0-9.]", ""), condition.getVersion()) &&
+        contains(operatingSystem.getName(), condition.getOs()) &&
+        contains(operatingSystem.getArchitecture(), condition.getArchitecture()) &&
+        contains(operatingSystem.getDistribution(), condition.getDistribution()) &&
+        withinVersion(operatingSystem.getDistributionVersion(), condition.getDistributionVersion());
+  }
+
+  private boolean contains(String actualValue, String partialValue) {
+    return partialValue == null ||
+        (actualValue != null && actualValue.toLowerCase().contains(partialValue.toLowerCase()));
+  }
+
+  private boolean withinVersion(String distroVersion, String versionSpec) {
+    return versionSpec == null ||
+        (distroVersion != null && VersionUtil.isWithin(distroVersion, versionSpec));
+  }
+
 	public PhantomJSArchive build() {
-		PhantomJSArchive archive = null;
-  	if (platform.contains("win")) {
-  		archive = new WindowsPhantomJSArchive(version);
-  	} else if (platform.contains("mac")) {
-  		archive = new MacOSXPhantomJSArchive(version);
-  	} else if (platform.contains("nux")) {
-  		String modifier = arch.contains("64") ? "x86_64" : "i686"; 
- 			archive = new LinuxPhantomJSArchive(version, modifier);
-  	}
+
+	  PhantomJSArchive archive = null;
+
+		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    URL resource = PhantomJSArchiveBuilder.class.getResource("/archive-mapping.yaml");
+    try {
+      ArchiveMappings archiveMappings = mapper.readValue(resource, ArchiveMappings.class);
+      for (ArchiveMapping archiveMapping : archiveMappings.getMappings()) {
+        if (contains(archiveMapping.getCondition())) {
+          archive = new PhantomJSArchiveImpl(archiveMapping.getArchive(), this.version);
+          break;
+        }
+      }
+    } catch (IOException e) {
+      LOGGER.error("Unable to read archive-mapping.yaml", e);
+    }
   	if (archive == null) {
-  		throw new IllegalArgumentException("unknown platform: " + platform);
+  		throw new IllegalArgumentException("unknown platform: " + operatingSystem.getName());
   	}
   	return archive;
 	}
